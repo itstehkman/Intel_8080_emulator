@@ -1,0 +1,8 @@
+structs:
+cpu_state
+instruction
+
+functions:
+main
+fetch_and_decode
+emulate
