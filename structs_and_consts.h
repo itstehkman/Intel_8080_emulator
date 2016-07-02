@@ -2,6 +2,12 @@
 #define CONSTS_H
 
 #include <stdio.h>
+#include <time.h>
+
+/** TIMER SPECIFC **/
+
+static clock_t time_since_sleep = 0;
+static unsigned short inst_since_sleep = 1;
 
 /** CONSTS **/
 
@@ -9,6 +15,7 @@
 #define NUM_REGS 8
 #define MEM_SIZE 0x10000  //16 bit addresses
 #define ROM_START 0x0
+#define NSECS_PER_CYCLE 500  // 2 MHz
 
 /** STRUCTS **/
 
@@ -62,4 +69,7 @@ char load_rom (struct cpu_state *state, const char *filepath);
  */
 instruction fetch_decode (struct cpu_state *state);
 
+void print_inst(cpu_state *state, instruction *inst);
+void emulate_cycle(cpu_state *state);
+void cycle(cpu_state *state, void (*emulate_func)(cpu_state *state));
 #endif

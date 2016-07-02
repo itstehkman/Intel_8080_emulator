@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "structs_and_consts.h"
 #include "instruction_lookup.h"
@@ -6,10 +8,9 @@
 // Courtesy of http://fms.komkon.org/comp/CPUs/8080.txt for
 // list of instruction types
 
-
-void print_inst(cpu_state *state, instruction *inst);
-
+//Instruction implementations
 void nop(cpu_state *state, instruction *inst) {
+
 }
 void hlt(cpu_state *state, instruction *inst) {
 
