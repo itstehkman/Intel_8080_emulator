@@ -13,8 +13,8 @@ int main (int argc, const char *argv[]) {
   cpu_state state;
 
 	if (!load_rom(&state, argv[1])) {  
-		fprintf(stderr, "Error reading ROM - either file doesn't exist \
-		or error reading memory");
+		fprintf(stderr, "Error reading ROM - either file doesn't exist" 
+			" or error reading memory\n");
 		exit(1);
 	}
 
@@ -39,8 +39,6 @@ char load_rom (struct cpu_state *state, const char *filepath) {
   unsigned int size = ftell(f);
   fseek(f, 0, SEEK_SET);
   
-  //char *rom = (char *)calloc(size, 1);
-	
 	fread(&state->memory[ROM_START], 1, size, f);
 	state->rom_size = size;
 

@@ -1,0 +1,4 @@
+atari_emulator
+*.o
+.DS_Store
+
