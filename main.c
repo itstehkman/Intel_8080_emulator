@@ -22,12 +22,10 @@ int main (int argc, const char *argv[]) {
 	state.sp = 0;
 
 	for (int i = 0; i < state.rom_size; i++) {
-		//fetch_decode(&state);
-		cycle(&state, emulate_cycle);
+		lineup_in_cycle(&state, emulate_cycle);
 	}
 
   return 0;
-
 }
 
 char load_rom (struct cpu_state *state, const char *filepath) {

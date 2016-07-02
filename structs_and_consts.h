@@ -71,5 +71,5 @@ instruction fetch_decode (struct cpu_state *state);
 
 void print_inst(cpu_state *state, instruction *inst);
 void emulate_cycle(cpu_state *state);
-void cycle(cpu_state *state, void (*emulate_func)(cpu_state *state));
+void lineup_in_cycle(cpu_state *state, void (*emulate_func)(cpu_state *state));
 #endif

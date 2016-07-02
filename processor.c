@@ -18,24 +18,13 @@ void emulate_cycle(cpu_state *state) {
 	print_inst(state, &inst);
 }
 
-void cycle(cpu_state *state, void (*emulate_func)(cpu_state *state)) {
+void lineup_in_cycle(cpu_state *state, void (*emulate_func)(cpu_state *state)) {
 	clock_t start = clock();
 
 	emulate_func(state);  // The meat of the program
 
-	clock_t elapsed = 1E9 * ((float)(clock() - start)) / CLOCKS_PER_SEC;
-	time_since_sleep += elapsed;
-	
-	long sleep_candidate = NSECS_PER_CYCLE * inst_since_sleep - time_since_sleep;
-	if (sleep_candidate > 0) {
-		struct timespec time = {0, sleep_candidate};
-		nanosleep(&time, NULL);
-		time_since_sleep = 0;
-		inst_since_sleep = 1;
-		printf("sleeping for %lu ns\n", sleep_candidate);
-	} 
-	else {
-		inst_since_sleep++;
-		printf("$1: %hu 2: %lu\n", inst_since_sleep, time_since_sleep);
-	}
+	clock_t elapsed = 1E9 * ((float)(clock() - start)) / CLOCKS_PER_SEC; 
+	struct timespec time = {0, NSECS_PER_CYCLE - (elapsed % NSECS_PER_CYCLE)};
+	nanosleep(&time, NULL);
+	printf("%lu\n", time.tv_nsec);
 }
