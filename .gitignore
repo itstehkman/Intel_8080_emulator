@@ -1,4 +1,5 @@
 atari_emulator
+8080_emulator
 *.o
 .DS_Store
 

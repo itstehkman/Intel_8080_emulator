@@ -4,18 +4,14 @@
 #include <stdio.h>
 #include <time.h>
 
-/** TIMER SPECIFC **/
-
-static clock_t time_since_sleep = 0;
-static unsigned short inst_since_sleep = 1;
-
 /** CONSTS **/
 
 #define NUM_ARGS 2
 #define NUM_REGS 8
+#define NUM_INST_TYPE 94
 #define MEM_SIZE 0x10000  //16 bit addresses
 #define ROM_START 0x0
-#define NSECS_PER_CYCLE 500  // 2 MHz
+#define NSECS_PER_CYCLE 2000 // .5 MHz, goal is to get 2 MHz
 
 /** STRUCTS **/
 
@@ -70,6 +66,7 @@ char load_rom (struct cpu_state *state, const char *filepath);
 instruction fetch_decode (struct cpu_state *state);
 
 void print_inst(cpu_state *state, instruction *inst);
-void emulate_cycle(cpu_state *state);
-void lineup_in_cycle(cpu_state *state, void (*emulate_func)(cpu_state *state));
+unsigned short emulate_inst_and_get_num_cycles(cpu_state *state);
+void lineup_in_cycle(cpu_state *state, unsigned short (*emulate_func)(cpu_state *state));
+
 #endif

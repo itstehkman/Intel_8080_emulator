@@ -1,10 +1,12 @@
+#include <Python/Python.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "structs_and_consts.h" 
 
-int main (int argc, const char *argv[]) {
+int main(int argc, const char *argv[]) {
   if (argc != NUM_ARGS){
     fprintf(stderr, "usage: %s <rom-file>\n", argv[0]);
     exit(1);
@@ -22,13 +24,13 @@ int main (int argc, const char *argv[]) {
 	state.sp = 0;
 
 	for (int i = 0; i < state.rom_size; i++) {
-		lineup_in_cycle(&state, emulate_cycle);
+		lineup_in_cycle(&state, emulate_inst_and_get_num_cycles);
 	}
 
   return 0;
 }
 
-char load_rom (struct cpu_state *state, const char *filepath) {
+char load_rom(struct cpu_state *state, const char *filepath) {
   FILE *f = fopen(filepath, "r");
   if (!f) {
     return 0;
