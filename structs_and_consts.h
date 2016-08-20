@@ -16,6 +16,7 @@
 #define ROM_START 0x0
 
 #define NSECS_PER_CYCLE 500 // 2 MHz
+
 #define SCREEN_WIDTH 224
 #define SCREEN_HEIGHT 256
 
@@ -89,7 +90,7 @@ void print_state(cpu_state *state);
 
 instruction fetch_decode(struct cpu_state *state);
 uint16_t emulate_inst_and_get_num_cycles(cpu_state *state);
-void lineup_in_cycle(cpu_state *state, unsigned short (*emulate_func)(cpu_state *state));
+void lineup_with_cpu_rate(cpu_state *state, unsigned short (*emulate_func)(cpu_state *state));
 
 cpu_state cpu_state_from_rom_file(const char* rom_path);
 void run_cpu(cpu_state *state);

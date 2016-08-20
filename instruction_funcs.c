@@ -524,21 +524,17 @@ static void push_data(cpu_state *state, uint16_t data) {
 }
 
 uint8_t is_not_pc_changing_inst(instruction *inst) {
-    
     instruction_t t = inst->inst_t;
-    uint8_t matches = 0;
     
-    instruction_t pc_changing_insts[] = {
-        JMP, CALL, RET,
-        JNZ, CNZ, RNZ, JZ, CZ, RZ,
-        JNC, CNC, RNC, JC, CC, RC,
-        JPO, CPO, RPO, JPE, CPE, RPE,
-        JP, CP, RP, JM, CM, RM};
-    
-    for (uint8_t i = 0; i < sizeof(pc_changing_insts) / sizeof(instruction_t); i++) {
-        matches |= (t == pc_changing_insts[i]);
-    }
-    return !matches;
+    return  t == JMP    || t == CALL    || t == RET ||
+            t == JNZ    || t == CNZ     || t == RNZ ||
+            t == JZ     || t == CZ      || t == RZ  ||
+            t == JNC    || t == CNC     || t == RNC ||
+            t == JC     || t == CC      || t == RC  ||
+            t == JPO    || t == CPO     || t == RPO ||
+            t == JPE    || t == CPE     || t == RPE ||
+            t == JP     || t == CP      || t == RP  ||
+            t == JM     || t == CM      || t == RM;
 }
 
 
