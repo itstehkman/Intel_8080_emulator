@@ -20,7 +20,7 @@ cpu_state cpu_state_from_rom_file(const char* rom_path) {
     return state;
 }
 
-char load_rom(struct cpu_state *state, const char *filepath) {
+uint8_t load_rom(struct cpu_state *state, const char *filepath) {
     FILE *f = fopen(filepath, "r");
     if (!f) {
         return 0;

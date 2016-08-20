@@ -6,16 +6,31 @@
 
 /** CONSTS **/
 
+#define DEBUG_ON 0
+
 #define NUM_ARGS 2
 
-#define NUM_REGS 8
+#define NUM_REGS 12
 #define NUM_INST_TYPE 94
 #define MEM_SIZE 0x10000  //16 bit addresses
 #define ROM_START 0x0
 
-#define NSECS_PER_CYCLE 500 // .5 MHz, goal is to get 2 MHz
+#define NSECS_PER_CYCLE 500 // 2 MHz
 #define SCREEN_WIDTH 224
 #define SCREEN_HEIGHT 256
+
+#define S_shift 7
+#define Z_shift 6
+#define A_shift 4
+#define P_shift 2
+#define C_shift 0
+
+#define S_mask  1 << S_shift
+#define Z_mask  1 << Z_shift
+#define A_mask  1 << A_shift  // Unused in space invaders
+#define P_mask  1 << P_shift
+#define C_mask  1 << C_shift
+
 
 /** STRUCTS **/
 
@@ -34,11 +49,11 @@ typedef enum {
 } reg;
 
 typedef struct cpu_state {
-    char regs[NUM_REGS];
-    char memory[MEM_SIZE];
-    unsigned int rom_size;
-    unsigned int sp;
-    unsigned int pc;
+    uint8_t regs[NUM_REGS];
+    uint8_t memory[MEM_SIZE];
+    uint32_t rom_size;
+    uint16_t sp;
+    uint16_t pc;
 } cpu_state;
 
 typedef struct instruction instruction;
@@ -49,8 +64,8 @@ typedef struct instruction {
     instruction_t inst_t;
     inst_func inst_func;
     reg regs[2];
-    char num_bytes;
-    char num_cycles;
+    uint8_t num_bytes;
+    uint8_t num_cycles;
 } instruction;
 
 /** FUNCTION DECLARATIONS **/
@@ -61,18 +76,28 @@ typedef struct instruction {
  *  Errors: if file doesn't exist or there's a problem reading memory,
  *	the state->rom will be NULL, so check for that.
  */
-char load_rom (struct cpu_state *state, const char *filepath);
+uint8_t load_rom(struct cpu_state *state, const char *filepath);
+
+void print_debug(cpu_state *state, instruction *inst);
+void print_inst(cpu_state *state, instruction *inst);
+void print_state(cpu_state *state);
 
 /*
  * Given the cpu_state, use pc to read an instruction from the
  * rom and update the pc.
  */
-instruction fetch_decode (struct cpu_state *state);
 
-void print_inst(cpu_state *state, instruction *inst);
-unsigned short emulate_inst_and_get_num_cycles(cpu_state *state);
+instruction fetch_decode(struct cpu_state *state);
+uint16_t emulate_inst_and_get_num_cycles(cpu_state *state);
 void lineup_in_cycle(cpu_state *state, unsigned short (*emulate_func)(cpu_state *state));
+
 cpu_state cpu_state_from_rom_file(const char* rom_path);
 void run_cpu(cpu_state *state);
+
+uint16_t data_for_instruction(cpu_state *state, instruction *inst);
+uint16_t data_for_regpair(cpu_state *state, reg regpair);
+uint8_t is_not_pc_changing_inst(instruction *inst);
+
+uint8_t get_flagbit(cpu_state *state, uint8_t bit_shift);
 
 #endif
