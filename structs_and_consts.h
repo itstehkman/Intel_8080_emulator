@@ -6,8 +6,6 @@
 
 /** CONSTS **/
 
-#define DEBUG_ON 0
-
 #define NUM_ARGS 2
 
 #define NUM_REGS 12
@@ -16,6 +14,7 @@
 #define ROM_START 0x0
 
 #define NSECS_PER_CYCLE 500 // 2 MHz
+#define USECS_PER_CYCLE .5
 
 #define SCREEN_WIDTH 224
 #define SCREEN_HEIGHT 256
@@ -71,6 +70,7 @@ typedef struct instruction {
 
 /** FUNCTION DECLARATIONS **/
 
+void set_debug_mode(uint8_t mode);
 /*
  *  Loads the block of bytes of the rom into the cpu_state, given the filepath.
  *  Returns: 1 if successful load, 0 otherwise
@@ -97,7 +97,7 @@ void run_cpu(cpu_state *state);
 
 uint16_t data_for_instruction(cpu_state *state, instruction *inst);
 uint16_t data_for_regpair(cpu_state *state, reg regpair);
-uint8_t is_not_pc_changing_inst(instruction *inst);
+uint8_t is_pc_changing_inst(instruction *inst);
 
 uint8_t get_flagbit(cpu_state *state, uint8_t bit_shift);
 

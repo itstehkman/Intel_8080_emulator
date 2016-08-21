@@ -523,7 +523,7 @@ static void push_data(cpu_state *state, uint16_t data) {
     state->sp -= 2;
 }
 
-uint8_t is_not_pc_changing_inst(instruction *inst) {
+uint8_t is_pc_changing_inst(instruction *inst) {
     instruction_t t = inst->inst_t;
     
     return  t == JMP    || t == CALL    || t == RET ||
