@@ -25,7 +25,7 @@ static const instruction inst_lookup[0x100] = {
 {INR, inr, {L, 0}, 1, 5}, {DCR, dcr, {L, 0}, 1, 5}, {MVI, mvi, {L,0}, 2,7}, {CMA, cma, {0,0}, 1, 4},
 
 {NOP, nop, {0,0}, 1, 4}, {LXI, lxi, {SP,0}, 3, 10}, {STA, sta, {0, 0}, 3, 13}, {INX, inx, {SP, 0}, 1, 5},
-{INR, inr, {H, 0}, 1, 5}, {DCR, dcr, {H, 0}, 1, 5}, {MVI, mvi, {H,0}, 2, 7}, {STC, stc, {0,0}, 1, 4}, 
+{INR, inr, {H, 0}, 1, 5}, {DCR, dcr, {H, 0}, 1, 5}, {MVI, mvi, {M,0}, 2, 10}, {STC, stc, {0,0}, 1, 4},
 {NOP, nop, {0,0}, 1, 4}, {DAD, dad, {SP, 0}, 1, 10}, {LDA, lda, {0, 0}, 3, 13}, {DCX, dcx, {SP, 0}, 1, 5}, 
 {INR, inr, {A, 0}, 1, 5}, {DCR, dcr, {A, 0}, 1, 5}, {MVI, mvi, {A,0}, 2,7}, {CMC, cmc, {0,0}, 1, 4},
 

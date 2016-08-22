@@ -11,7 +11,7 @@ clock_t time_usec(void);
 
 static uint8_t DEBUG_MODE = 1;
 void set_debug_mode(uint8_t mode) {
-    DEBUG_MODE = 1;
+    DEBUG_MODE = mode;
 }
 
 void run_cpu(cpu_state *state) {
@@ -73,7 +73,7 @@ void lineup_with_cpu_rate(cpu_state *state, unsigned short (*emulate_func)(cpu_s
     
     // if it isn't already the right stall-time, then stall
     if (stall_time_usec >= 0) {
-        usleep(stall_time_usec);
+        //usleep(stall_time_usec);
         total_inst_fast_enough++;
     } else {
         total_inst_not_fast_enough++;

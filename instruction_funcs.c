@@ -70,7 +70,7 @@ void mov(cpu_state *state, instruction *inst) {
         state->regs[reg0] = state->memory[address];
     }
     else {
-        state->regs[reg0] = state->regs[1];
+        state->regs[reg0] = state->regs[reg1];
     }
 }
 
@@ -121,16 +121,16 @@ void lxi(cpu_state *state, instruction *inst) {
     uint8_t lsb = (data >> 8);
     
     if (reg0 == B) { // BC register pair
-        state->regs[B] = msb;
-        state->regs[C] = lsb;
+        state->regs[B] = lsb;
+        state->regs[C] = msb;
     }
     else if (reg0 == D) { // DE reg pair
-        state->regs[D] = msb;
-        state->regs[E] = lsb;
+        state->regs[D] = lsb;
+        state->regs[E] = msb;
     }
     else if (reg0 == H) { // HL reg pair
-        state->regs[H] = msb;
-        state->regs[L] = lsb;
+        state->regs[H] = lsb;
+        state->regs[L] = msb;
     }
     else if (reg0 == SP) {
         state->sp = (lsb << 8) | msb;
@@ -171,7 +171,7 @@ void pop(cpu_state *state, instruction *inst) {
         state->regs[L] = second;
     }
 
-    state->sp -= 2;
+    state->sp += 2;
 }
 
 void xthl(cpu_state *state, instruction *inst){}
@@ -318,7 +318,7 @@ void sbi(cpu_state *state, instruction *inst){}
 #pragma mark - 16 bit arithmetic
 
 void dad(cpu_state *state, instruction *inst){
-    reg reg0 = state->regs[0];
+    reg reg0 = inst->regs[0];
     uint16_t data1 = data_for_regpair(state, reg0);
     uint16_t data2 = data_for_regpair(state, H);  //contents of HL register pair
     uint32_t result = data1 + data2;
@@ -329,7 +329,7 @@ void dad(cpu_state *state, instruction *inst){
     set_flagbit(state, (result >> 8) & 1, C_shift);
 }
 void inx(cpu_state *state, instruction *inst){
-    reg reg0 = state->regs[0];
+    reg reg0 = inst->regs[0];
     uint16_t data = data_for_regpair(state, reg0);
     data++;
     uint8_t left = data >> 8;
@@ -511,6 +511,7 @@ static uint16_t pop_data(cpu_state *state, uint8_t num_bytes) {
         state->pc++;
     }
     
+    state->sp += 2;
     return data;
 }
 
