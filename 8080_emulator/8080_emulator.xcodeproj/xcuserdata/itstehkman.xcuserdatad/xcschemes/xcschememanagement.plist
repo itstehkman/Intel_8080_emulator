@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SchemeUserState</key>
+	<dict>
+		<key>8080_emulator.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>0</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>A6B2FBA61D2B095F00A22DE5</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>A6B2FBBC1D2B096000A22DE5</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>A6B2FBC71D2B096000A22DE5</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>
