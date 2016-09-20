@@ -54,6 +54,16 @@ typedef struct cpu_state {
     uint32_t rom_size;
     uint16_t sp;
     uint16_t pc;
+    
+    uint8_t interrupt_enable;
+    
+    // external hardware
+    uint8_t shift_left_byte;
+    uint8_t shift_right_byte;
+    uint8_t shift_offset;
+    
+    uint8_t ports[6];
+    
 } cpu_state;
 
 typedef struct instruction instruction;
@@ -71,6 +81,10 @@ typedef struct instruction {
 /** FUNCTION DECLARATIONS **/
 
 void set_debug_mode(uint8_t mode);
+void print_debug(cpu_state *state, instruction *inst);
+void print_inst(cpu_state *state, instruction *inst);
+void print_state(cpu_state *state);
+
 /*
  *  Loads the block of bytes of the rom into the cpu_state, given the filepath.
  *  Returns: 1 if successful load, 0 otherwise
@@ -78,27 +92,25 @@ void set_debug_mode(uint8_t mode);
  *	the state->rom will be NULL, so check for that.
  */
 uint8_t load_rom(struct cpu_state *state, const char *filepath);
-
-void print_debug(cpu_state *state, instruction *inst);
-void print_inst(cpu_state *state, instruction *inst);
-void print_state(cpu_state *state);
+cpu_state cpu_state_from_rom_file(const char* rom_path);
+void run_cpu(cpu_state *state);
+void gen_interrupt(cpu_state *state, uint8_t interrupt_num);
 
 /*
  * Given the cpu_state, use pc to read an instruction from the
  * rom and update the pc.
  */
-
 instruction fetch_decode(struct cpu_state *state);
 uint16_t emulate_inst_and_get_num_cycles(cpu_state *state);
 void lineup_with_cpu_rate(cpu_state *state, unsigned short (*emulate_func)(cpu_state *state));
-
-cpu_state cpu_state_from_rom_file(const char* rom_path);
-void run_cpu(cpu_state *state);
 
 uint16_t data_for_instruction(cpu_state *state, instruction *inst);
 uint16_t data_for_regpair(cpu_state *state, reg regpair);
 uint8_t is_pc_changing_inst(instruction *inst);
 
 uint8_t get_flagbit(cpu_state *state, uint8_t bit_shift);
+
+void push_data(cpu_state *state, uint16_t data);
+uint16_t pop_data(cpu_state *state, uint8_t num_bytes);
 
 #endif

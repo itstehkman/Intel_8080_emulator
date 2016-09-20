@@ -74,9 +74,9 @@ static const instruction inst_lookup[0x100] = {
 {RZ, rz, {0,0}, 1, 11}, {RET, ret, {0,0}, 1, 10}, {JZ, jz, {0,0}, 3, 10}, {JMP, jmp, {0,0}, 3, 10},
 {CZ, cz, {0,0}, 3, 17}, {CALL, call, {0,0}, 3, 17}, {ACI, aci, {0,0}, 2, 7}, {RST1, rst1, {0,0}, 1, 11},
 
-{RNC, rnc, {0,0}, 1, 11}, {POP, pop, {D,0}, 1, 10}, {JNC, jnc, {0,0}, 3, 10}, {OUT, out, {0,0}, 2, 10},
+{RNC, rnc, {0,0}, 1, 11}, {POP, pop, {D,0}, 1, 10}, {JNC, jnc, {0,0}, 3, 10}, {OUT, out_inst, {0,0}, 2, 10},
 {CNC, cnc, {0,0}, 3, 17}, {PUSH, push, {D, 0}, 1, 11}, {SUI, sui, {0,0}, 2, 7}, {RST2, rst2, {0,0}, 1, 11},
-{RC, rc, {0,0}, 1, 11}, {RET, ret, {0,0}, 1, 10}, {JC, jc, {0,0}, 3, 10}, {IN, in, {0,0}, 2, 10},
+{RC, rc, {0,0}, 1, 11}, {RET, ret, {0,0}, 1, 10}, {JC, jc, {0,0}, 3, 10}, {IN, in_inst, {0,0}, 2, 10},
 {CC, cc, {0,0}, 3, 17}, {CALL, call, {0,0}, 3, 17}, {SBI, sbi, {0,0}, 2, 7}, {RST3, rst3, {0,0}, 1, 11},
 
 {RPO, rpo, {0,0}, 1, 11}, {POP, pop, {H,0}, 1, 10}, {JPO, jpo, {0,0}, 3, 10}, {XTHL, xthl, {0,0}, 1, 18},

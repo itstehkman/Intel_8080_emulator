@@ -16,6 +16,8 @@ cpu_state cpu_state_from_rom_file(const char* rom_path) {
     
     state.pc = ROM_START;
     state.sp = 0;
+    state.interrupt_enable = 0;
+    state.shift_left_byte = state.shift_right_byte = state.shift_offset = 0;
     
     return state;
 }

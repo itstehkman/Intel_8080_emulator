@@ -28,15 +28,15 @@
 //      1st reg of pair (or msb of pc) loaded from sp+1
 //      sp += 2
 
-#pragma mark - helper function decls
+#pragma mark - helper function declarationss
 
 static int is_allowed_to_write_here(cpu_state *state, uint16_t offset);
 static void write_to_mem(cpu_state *state, uint16_t offset, uint16_t data);
 //static void write_to_HL(cpu_state *state, uint16_t data);
 static uint16_t read_from_HL(cpu_state *state);
 
-static void push_data(cpu_state *state, uint16_t data);
-static uint16_t pop_data(cpu_state *state, uint8_t num_bytes);
+//void push_data(cpu_state *state, uint16_t data);
+//uint16_t pop_data(cpu_state *state, uint8_t num_bytes);
 static uint16_t reverse2bytes(uint16_t data);
 
 static uint8_t calc_parity(uint16_t data);
@@ -109,7 +109,12 @@ void stax(cpu_state *state, instruction *inst){}
 #pragma mark - 16 bit transfers
 
 void lhld(cpu_state *state, instruction *inst){}
-void shld(cpu_state *state, instruction *inst){}
+void shld(cpu_state *state, instruction *inst){
+    uint16_t HL_data = data_for_regpair(state, H);
+    uint16_t address = data_for_instruction(state, inst);
+    
+    write_to_mem(state, address, reverse2bytes(HL_data));
+}
 
 void lxi(cpu_state *state, instruction *inst) {
     reg reg0 = inst->regs[0];
@@ -219,7 +224,28 @@ void dcr(cpu_state *state, instruction *inst){
                  next_value > current_value);
 }
 
-void cmp(cpu_state *state, instruction *inst){}
+void cmp(cpu_state *state, instruction *inst){
+    reg cmp_reg = inst->regs[0];
+    uint8_t cmp_data = 0;
+    
+    switch (cmp_reg) {
+        case H:
+            cmp_data = data_for_regpair(state, H);
+            break;
+        default:
+            cmp_data = state->regs[cmp_reg];
+            break;
+    }
+    
+    uint16_t result = state->regs[A] - cmp_data;
+    set_flagbits_szapc(state,
+                       (result >> 7) & 1,
+                       (result & 0xff) == 0,
+                       0,
+                       calc_parity(result),
+                       (result >> 8) & 1);
+    
+}
 void ana(cpu_state *state, instruction *inst){
     reg reg0 = inst->regs[0];
     uint8_t data;
@@ -371,7 +397,7 @@ void ret(cpu_state *state, instruction *inst){
 }
 
 void jnz(cpu_state *state, instruction *inst){
-    if (!(state->regs[F] & Z_mask)) {
+    if (!get_flagbit(state, Z_shift)) {
         state->pc = data_for_instruction(state, inst);
     }
     else {
@@ -380,27 +406,112 @@ void jnz(cpu_state *state, instruction *inst){
 }
 
 void cnz(cpu_state *state, instruction *inst){}
-void rnz(cpu_state *state, instruction *inst){}
-void jz(cpu_state *state, instruction *inst){}
+void rnz(cpu_state *state, instruction *inst){
+    if (!get_flagbit(state, Z_shift)) {
+        state->pc = pop_data(state, 2);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
+void jz(cpu_state *state, instruction *inst){
+    if (get_flagbit(state, Z_shift)) {
+        state->pc = data_for_instruction(state, inst);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
 void cz(cpu_state *state, instruction *inst){}
-void rz(cpu_state *state, instruction *inst){}
-void jnc(cpu_state *state, instruction *inst){}
-void cnc(cpu_state *state, instruction *inst){}
+void rz(cpu_state *state, instruction *inst){
+    if (get_flagbit(state, Z_shift)) {
+        state->pc = pop_data(state, 2);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
+void jnc(cpu_state *state, instruction *inst){
+    if (!get_flagbit(state, C_shift)) {
+        state->pc = data_for_instruction(state, inst);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
+void cnc(cpu_state *state, instruction *inst){
+    if (!get_flagbit(state, C_shift)) {
+        uint16_t return_pc = state->pc + inst->num_bytes;
+        push_data(state, return_pc);
+        state->pc = data_for_instruction(state, inst);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
 void rnc(cpu_state *state, instruction *inst){}
-void jc(cpu_state *state, instruction *inst){}
+void jc(cpu_state *state, instruction *inst){
+    if (get_flagbit(state, C_shift)) {
+        state->pc = data_for_instruction(state, inst);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
 void cc(cpu_state *state, instruction *inst){}
-void rc(cpu_state *state, instruction *inst){}
+void rc(cpu_state *state, instruction *inst){
+    if (get_flagbit(state, C_shift)) {
+        state->pc = pop_data(state, 2);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
 void jpo(cpu_state *state, instruction *inst){}
 void cpo(cpu_state *state, instruction *inst){}
 void rpo(cpu_state *state, instruction *inst){}
 void jpe(cpu_state *state, instruction *inst){}
-void cpe(cpu_state *state, instruction *inst){}
+void cpe(cpu_state *state, instruction *inst){
+    if (get_flagbit(state, P_shift)) {   // parity of 1 is even
+        uint16_t return_pc = state->pc + inst->num_bytes;
+        push_data(state, return_pc);
+        state->pc = data_for_instruction(state, inst);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
 void rpe(cpu_state *state, instruction *inst){}
 void jp(cpu_state *state, instruction *inst){}
-void cp(cpu_state *state, instruction *inst){}
-void rp(cpu_state *state, instruction *inst){}
+void cp(cpu_state *state, instruction *inst){
+    if (!get_flagbit(state, S_shift)) {   // sign off is plus
+        uint16_t return_pc = state->pc + inst->num_bytes;
+        push_data(state, return_pc);
+        state->pc = data_for_instruction(state, inst);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
+void rp(cpu_state *state, instruction *inst){
+    if (!get_flagbit(state, S_shift)) {  // If sign bit is on, it is negative
+        state->pc = pop_data(state, 2);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
 void jm(cpu_state *state, instruction *inst){}
-void cm(cpu_state *state, instruction *inst){}
+void cm(cpu_state *state, instruction *inst){
+    if (get_flagbit(state, S_shift)) {   // sign on is minus
+        uint16_t return_pc = state->pc + inst->num_bytes;
+        push_data(state, return_pc);
+        state->pc = data_for_instruction(state, inst);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
 void rm(cpu_state *state, instruction *inst){}
 
 #pragma mark - Rotations
@@ -418,28 +529,68 @@ void rrc(cpu_state *state, instruction *inst){
 
 #pragma mark - Other
 
-void in(cpu_state *state, instruction *inst){}
-void out(cpu_state *state, instruction *inst){
-#warning do this
+#warning The in and out functions are hardcoded strategies for Space Invaders. It should instead be generalized for any program.
+// Read from http://computerarcheology.com/Arcade/SpaceInvaders/Hardware.html for more information on the shift hardware
+void in_inst(cpu_state *state, instruction *inst){
+    uint8_t port = data_for_instruction(state, inst);
+    uint16_t a = 0;
+    
+    switch (port) {
+        case 0:
+            a = 1;
+            break;
+        case 1:
+            a = state->ports[1];
+            break;
+        case 3:
+            a = state->shift_left_byte << 8 | state->shift_right_byte;
+            a >>= (8 - state->shift_offset) & 0xff;
+            break;
+        default:
+            return;  // don't set regs[A] when it shouldn't be changed
+    }
+    
+    state->regs[A] = a;
+}
+void out_inst(cpu_state *state, instruction *inst){
+    uint8_t data = state->regs[A];
+    uint8_t port = data_for_instruction(state, inst);
+    
+    switch (port) {
+        case 2:  // Port 2 sets the shift amount
+            state->shift_offset = data & 0x7;
+            break;
+        case 4:  // Port 4 writes a byte to the 16 bit shift register
+            state->shift_right_byte = state->shift_left_byte;
+            state->shift_left_byte = data & 0x7;
+            break;
+    }
 }
 
 void cmc(cpu_state *state, instruction *inst){}
 void stc(cpu_state *state, instruction *inst){}
 void cma(cpu_state *state, instruction *inst){}
 
-void di(cpu_state *state, instruction *inst) {}
+void di(cpu_state *state, instruction *inst) {
+    state->interrupt_enable = 0;
+}
 void ei(cpu_state *state, instruction *inst) {
-#warning do this
+    state->interrupt_enable = 1;
 }
 
-void rst0(cpu_state *state, instruction *inst){}
-void rst1(cpu_state *state, instruction *inst){}
-void rst2(cpu_state *state, instruction *inst){}
-void rst3(cpu_state *state, instruction *inst){}
-void rst4(cpu_state *state, instruction *inst){}
-void rst5(cpu_state *state, instruction *inst){}
-void rst6(cpu_state *state, instruction *inst){}
-void rst7(cpu_state *state, instruction *inst){}
+void rst(cpu_state *state, instruction *inst, uint8_t interrupt_num){
+    push_data(state, state->pc);
+    state->pc = 8 * interrupt_num;
+}
+
+void rst0(cpu_state *state, instruction *inst){ rst(state, inst, 0);}
+void rst1(cpu_state *state, instruction *inst){ rst(state, inst, 1);}
+void rst2(cpu_state *state, instruction *inst){ rst(state, inst, 2);}
+void rst3(cpu_state *state, instruction *inst){ rst(state, inst, 3);}
+void rst4(cpu_state *state, instruction *inst){ rst(state, inst, 4);}
+void rst5(cpu_state *state, instruction *inst){ rst(state, inst, 5);}
+void rst6(cpu_state *state, instruction *inst){ rst(state, inst, 6);}
+void rst7(cpu_state *state, instruction *inst){ rst(state, inst, 7);}
 
 #pragma mark - Assembler directives
 
@@ -503,11 +654,11 @@ static uint16_t read_from_HL(cpu_state *state) {
     return ((state->regs[H] << 8) | state->regs[L]);
 }
 
-static uint16_t pop_data(cpu_state *state, uint8_t num_bytes) {
+uint16_t pop_data(cpu_state *state, uint8_t num_bytes) {
     uint16_t data = 0;
     
     for (uint8_t i = 0; i < num_bytes; i++) {
-        data |= state->memory[state->sp + i] << (i*8);
+        data |= state->memory[state->sp + i] << (i * 8);
         state->pc++;
     }
     
@@ -515,7 +666,7 @@ static uint16_t pop_data(cpu_state *state, uint8_t num_bytes) {
     return data;
 }
 
-static void push_data(cpu_state *state, uint16_t data) {
+void push_data(cpu_state *state, uint16_t data) {
     uint8_t msb = (uint8_t)data;  // if data is from reg_pair, this is second reg
     uint8_t lsb = (uint8_t)(data >> 8);  // first reg
     

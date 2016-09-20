@@ -96,8 +96,8 @@ void rlc(cpu_state *state, instruction *inst);
 void rrc(cpu_state *state, instruction *inst);
 
 // Other
-void in(cpu_state *state, instruction *inst);
-void out(cpu_state *state, instruction *inst);
+void in_inst(cpu_state *state, instruction *inst);
+void out_inst(cpu_state *state, instruction *inst);
 
 void cmc(cpu_state *state, instruction *inst);
 void stc(cpu_state *state, instruction *inst);
