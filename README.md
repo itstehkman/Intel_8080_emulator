@@ -1,4 +1,4 @@
-##Intel 8080 Emulator!!
+## Intel 8080 Emulator!!
 
 This is an emulation of the Intel 8080 processor and the Space Invaders external hardware. I also  
 programmed the I/O and the graphics rendering. The main purpose of this project was to create
@@ -7,7 +7,7 @@ Space Invaders come to life (a very satisfying feeling!). With some hard work th
 to turn into a Gameboy Original emulator, since the architecture for that is very similar to the Intel 8080, with
 256 additional instructions.
 
-###Instructions to use
+### Instructions to use
 You will need Xcode to run the application. Open up the xcodeproj file and run the project
 
 The controls are as such:
