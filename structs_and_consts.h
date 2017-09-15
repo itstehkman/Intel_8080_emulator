@@ -82,8 +82,8 @@ typedef struct instruction {
 
 void set_debug_mode(uint8_t mode);
 void print_debug(cpu_state *state, instruction *inst);
-void print_inst(cpu_state *state, instruction *inst);
-void print_state(cpu_state *state);
+void print_inst(cpu_state *state, instruction *inst, FILE *fp);
+void print_state(cpu_state *state, FILE *fp);
 
 /*
  *  Loads the block of bytes of the rom into the cpu_state, given the filepath.
@@ -101,8 +101,8 @@ void gen_interrupt(cpu_state *state, uint8_t interrupt_num);
  * rom and update the pc.
  */
 instruction fetch_decode(struct cpu_state *state);
-uint16_t emulate_inst_and_get_num_cycles(cpu_state *state);
-void lineup_with_cpu_rate(cpu_state *state, unsigned short (*emulate_func)(cpu_state *state));
+uint16_t emulate_inst_and_get_num_cycles(cpu_state *state, FILE *fp);
+void lineup_with_cpu_rate(cpu_state *state, unsigned short (*emulate_func)(cpu_state *state, FILE *fp), FILE *fp);
 
 uint16_t data_for_instruction(cpu_state *state, instruction *inst);
 uint16_t data_for_regpair(cpu_state *state, reg regpair);

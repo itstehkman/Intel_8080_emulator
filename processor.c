@@ -6,7 +6,7 @@
 #include "structs_and_consts.h"
 #include "instruction_lookup.h"
 
-void print_inst(cpu_state *state, instruction *inst);
+void print_inst(cpu_state *state, instruction *inst, FILE *fp);
 clock_t time_usec(void);
 
 static uint8_t DEBUG_MODE = 0;
@@ -16,8 +16,13 @@ void set_debug_mode(uint8_t mode) {
 
 
 void run_cpu(cpu_state *state) {
+    FILE *fp = NULL;
+    if (DEBUG_MODE) {
+        fp = fopen("/tmp/disassembly.mylog", "w");
+    }
+    
     while (1) {  // A HLT instruction will stop the program if necessary
-        lineup_with_cpu_rate(state, emulate_inst_and_get_num_cycles);
+        lineup_with_cpu_rate(state, emulate_inst_and_get_num_cycles, fp);
     }
 }
 
@@ -34,12 +39,12 @@ void gen_interrupt(cpu_state *state, uint8_t interrupt_num) {
 }
 
 // Returns the number of cycles to stall for
-uint16_t emulate_inst_and_get_num_cycles(cpu_state *state) {
+uint16_t emulate_inst_and_get_num_cycles(cpu_state *state, FILE *fp) {
     
     instruction inst = fetch_decode(state);
     
     if (DEBUG_MODE) {
-        print_inst(state, &inst);
+        print_inst(state, &inst, fp);
     }
     
     if (state->pc == 0x20) {
@@ -52,8 +57,8 @@ uint16_t emulate_inst_and_get_num_cycles(cpu_state *state) {
     }
     
     if (DEBUG_MODE) {
-        print_state(state);
-        printf("\n");
+        print_state(state, fp);
+        fprintf(fp, "\n");
     }
     return inst.num_cycles;
 }
@@ -66,13 +71,13 @@ clock_t time_usec(void) {
 
 #define kInterruptCheckTimeUsec 16666
 
-static clock_t last_inst_finish_usec = 0, last_interrupt_time = 0, interrupt_num = 1;
+static clock_t last_inst_finish_usec = 0, last_interrupt_time = 0, interrupt_num = 2;
 static unsigned long total_inst_fast_enough = 0;
 static unsigned long total_inst_not_fast_enough = 0;
 static float percent_too_slow = 0;
 
 // Emulating an instruction might be slower than expected, so we must make sure that everything is lined up
-void lineup_with_cpu_rate(cpu_state *state, unsigned short (*emulate_func)(cpu_state *state)) {
+void lineup_with_cpu_rate(cpu_state *state, unsigned short (*emulate_func)(cpu_state *state, FILE *fp), FILE *fp) {
     if (!last_inst_finish_usec) {
         last_inst_finish_usec = time_usec();  // So that we can populate a value for the first instruction
     }
@@ -87,7 +92,7 @@ void lineup_with_cpu_rate(cpu_state *state, unsigned short (*emulate_func)(cpu_s
         }
     }
     
-    unsigned short num_cycles = emulate_func(state);  // The meat of the program
+    unsigned short num_cycles = emulate_func(state, fp);  // The meat of the program
     clock_t elapsed_usec = time_usec() - last_inst_finish_usec;
     
     clock_t expected_inst_time_usec = ceil(num_cycles * USECS_PER_CYCLE);  // Could be x.5 usecs, but we are just truncating for now

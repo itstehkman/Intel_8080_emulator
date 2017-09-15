@@ -14,18 +14,18 @@ char char_if_bit_else_period(cpu_state *state, uint8_t bit_shift, char display) 
 }
 
 void print_debug(cpu_state *state, instruction *inst) {
-    print_inst(state, inst);
+    /*print_inst(state, inst);
     print_state(state);
-    printf("\n");
+    printf("\n");*/
 }
 
-void print_state(cpu_state *state) {
-    printf("\t");  // A, B, C, D, H, E, L, F, SP, M, PSW
-    printf("A: %02x B: %02x C: %02x D: %02x E: %02x H: %02x L: %02x SP: %04x",
+void print_state(cpu_state *state, FILE *fp) {
+    fprintf(fp, "\t");  // A, B, C, D, H, E, L, F, SP, M, PSW
+    fprintf(fp, "A: %02x B: %02x C: %02x D: %02x E: %02x H: %02x L: %02x SP: %04x",
            state->regs[A], state->regs[B], state->regs[C], state->regs[D], state->regs[E], state->regs[H],
            state->regs[L], state->sp);
     
-    printf(" %c%c%c%c%c",
+    fprintf(fp, " %c%c%c%c%c",
            char_if_bit_else_period(state, S_shift, 's'),
            char_if_bit_else_period(state, Z_shift, 'z'),
            char_if_bit_else_period(state, A_shift, 'a'),
@@ -34,342 +34,342 @@ void print_state(cpu_state *state) {
 }
 
 // PRINT
-void print_inst(cpu_state *state, instruction *inst) {
-    printf("%04x ", state->pc);
+void print_inst(cpu_state *state, instruction *inst, FILE *fp) {
+    fprintf(fp, "%04x ", state->pc);
     
     instruction_t inst_t = inst->inst_t;
     switch (inst_t) {
         case MOV:
-            printf("MOV");
+            fprintf(fp, "MOV");
             break;
         case MVI:
-            printf("MVI");
+           fprintf(fp, "MVI");
             break;
         case LDA:
-            printf("LDA");
+           fprintf(fp, "LDA");
             break;
         case STA:
-            printf("STA");
+           fprintf(fp, "STA");
             break;
         case LDAX:
-            printf("LDAX");
+           fprintf(fp, "LDAX");
             break;
         case STAX:
-            printf("STAX");
+           fprintf(fp, "STAX");
             break;
         case LHLD:
-            printf("LHLD");
+           fprintf(fp, "LHLD");
             break;
         case SHLD:
-            printf("SHLD");
+           fprintf(fp, "SHLD");
             break;
         case LXI:
-            printf("LXI");
+           fprintf(fp, "LXI");
             break;
         case PUSH:
-            printf("PUSH");
+           fprintf(fp, "PUSH");
             break;
         case POP:
-            printf("POP");
+           fprintf(fp, "POP");
             break;
         case XTHL:
-            printf("XTHL");
+           fprintf(fp, "XTHL");
             break;
         case SPHL:
-            printf("SPHL");
+           fprintf(fp, "SPHL");
             break;
         case PCHL:
-            printf("PCHL");
+           fprintf(fp, "PCHL");
             break;
         case XCHG:
-            printf("XCHG");
+           fprintf(fp, "XCHG");
             break;
         case ADD:
-            printf("ADD");
+           fprintf(fp, "ADD");
             break;
         case SUB:
-            printf("SUB");
+           fprintf(fp, "SUB");
             break;
         case INR:
-            printf("INR");
+           fprintf(fp, "INR");
             break;
         case DCR:
-            printf("DCR");
+           fprintf(fp, "DCR");
             break;
         case CMP:
-            printf("CMP");
+           fprintf(fp, "CMP");
             break;
         case ANA:
-            printf("ANA");
+           fprintf(fp, "ANA");
             break;
         case ORA:
-            printf("ORA");
+           fprintf(fp, "ORA");
             break;
         case XRA:
-            printf("XRA");
+           fprintf(fp, "XRA");
             break;
         case ADI:
-            printf("ADI");
+           fprintf(fp, "ADI");
             break;
         case SUI:
-            printf("SUI");
+           fprintf(fp, "SUI");
             break;
         case CPI:
-            printf("CPI");
+           fprintf(fp, "CPI");
             break;
         case ANI:
-            printf("ANI");
+           fprintf(fp, "ANI");
             break;
         case ORI:
-            printf("ORI");
+           fprintf(fp, "ORI");
             break;
         case XRI:
-            printf("XRI");
+           fprintf(fp, "XRI");
             break;
         case DAA:
-            printf("DAA");
+           fprintf(fp, "DAA");
             break;
         case ADC:
-            printf("ADC");
+           fprintf(fp, "ADC");
             break;
         case ACI:
-            printf("ACI");
+           fprintf(fp, "ACI");
             break;
         case SBB:
-            printf("SBB");
+           fprintf(fp, "SBB");
             break;
         case SBI:
-            printf("SBI");
+           fprintf(fp, "SBI");
             break;
         case DAD:
-            printf("DAD");
+           fprintf(fp, "DAD");
             break;
         case INX:
-            printf("INX");
+           fprintf(fp, "INX");
             break;
         case DCX:
-            printf("DCX");
+           fprintf(fp, "DCX");
             break;
         case JMP:
-            printf("JMP");
+           fprintf(fp, "JMP");
             break;
         case CALL:
-            printf("CALL");
+           fprintf(fp, "CALL");
             break;
         case RET:
-            printf("RET");
+           fprintf(fp, "RET");
             break;
         case JNZ:
-            printf("JNZ");
+           fprintf(fp, "JNZ");
             break;
         case CNZ:
-            printf("CNZ");
+           fprintf(fp, "CNZ");
             break;
         case RNZ:
-            printf("RNZ");
+           fprintf(fp, "RNZ");
             break;
         case JZ:
-            printf("JZ");
+           fprintf(fp, "JZ");
             break;
         case CZ:
-            printf("CZ");
+           fprintf(fp, "CZ");
             break;
         case RZ:
-            printf("RZ");
+           fprintf(fp, "RZ");
             break;
         case JNC:
-            printf("JNC");
+           fprintf(fp, "JNC");
             break;
         case CNC:
-            printf("CNC");
+           fprintf(fp, "CNC");
             break;
         case RNC:
-            printf("RNC");
+           fprintf(fp, "RNC");
             break;
         case JC:
-            printf("JC");
+           fprintf(fp, "JC");
             break;
         case CC:
-            printf("CC");
+           fprintf(fp, "CC");
             break;
         case RC:
-            printf("RC");
+           fprintf(fp, "RC");
             break;
         case JPO:
-            printf("JPO");
+           fprintf(fp, "JPO");
             break;
         case CPO:
-            printf("CPO");
+           fprintf(fp, "CPO");
             break;
         case RPO:
-            printf("RPO");
+           fprintf(fp, "RPO");
             break;
         case JPE:
-            printf("JPE");
+           fprintf(fp, "JPE");
             break;
         case CPE:
-            printf("CPE");
+           fprintf(fp, "CPE");
             break;
         case RPE:
-            printf("RPE");
+           fprintf(fp, "RPE");
             break;
         case JP:
-            printf("JP");
+           fprintf(fp, "JP");
             break;
         case CP:
-            printf("CP");
+           fprintf(fp, "CP");
             break;
         case RP:
-            printf("RP");
+           fprintf(fp, "RP");
             break;
         case JM:
-            printf("JM");
+           fprintf(fp, "JM");
             break;
         case CM:
-            printf("CM");
+           fprintf(fp, "CM");
             break;
         case RM:
-            printf("RM");
+           fprintf(fp, "RM");
             break;
         case RAL:
-            printf("RAL");
+           fprintf(fp, "RAL");
             break;
         case RAR:
-            printf("RAR");
+           fprintf(fp, "RAR");
             break;
         case RLC:
-            printf("RLC");
+           fprintf(fp, "RLC");
             break;
         case RRC:
-            printf("RRC");
+           fprintf(fp, "RRC");
             break;
         case IN:
-            printf("IN");
+           fprintf(fp, "IN");
             break;
         case OUT:
-            printf("OUT");
+           fprintf(fp, "OUT");
             break;
         case CMC:
-            printf("CMC");
+           fprintf(fp, "CMC");
             break;
         case STC:
-            printf("STC");
+           fprintf(fp, "STC");
             break;
         case CMA:
-            printf("CMA");
+           fprintf(fp, "CMA");
             break;
         case HLT:
-            printf("HLT");
+           fprintf(fp, "HLT");
             break;
         case NOP:
-            printf("NOP");
+           fprintf(fp, "NOP");
             break;
         case DI:
-            printf("DI");
+           fprintf(fp, "DI");
             break;
         case EI:
-            printf("EI");
+           fprintf(fp, "EI");
             break;
         case RST0:
-            printf("RST0");
+           fprintf(fp, "RST0");
             break;
         case RST1:
-            printf("RST1");
+           fprintf(fp, "RST1");
             break;
         case RST2:
-            printf("RST2");
+           fprintf(fp, "RST2");
             break;
         case RST3:
-            printf("RST3");
+           fprintf(fp, "RST3");
             break;
         case RST4:
-            printf("RST4");
+           fprintf(fp, "RST4");
             break;
         case RST5:
-            printf("RST5");
+           fprintf(fp, "RST5");
             break;
         case RST6:
-            printf("RST6");
+           fprintf(fp, "RST6");
             break;
         case RST7:
-            printf("RST7");
+           fprintf(fp, "RST7");
             break;
         case ORG:
-            printf("ORG");
+           fprintf(fp, "ORG");
             break;
         case END:
-            printf("END");
+           fprintf(fp, "END");
             break;
         case EQU:
-            printf("EQU");
+           fprintf(fp, "EQU");
             break;
         case SET:
-            printf("SET");
+           fprintf(fp, "SET");
             break;
         case IF:
-            printf("IF");
+           fprintf(fp, "IF");
             break;
         case ENDIF:
-            printf("ENDIF");
+           fprintf(fp, "ENDIF");
             break;
         case DB:
-            printf("DB");
+           fprintf(fp, "DB");
             break;
         case DW:
-            printf("DW");
+           fprintf(fp, "DW");
             break;
         case DS:
-            printf("DS");
+           fprintf(fp, "DS");
             break;
         default:
-            printf("unimplemented");
+           fprintf(fp, "unimplemented");
             break;
     }
     
     for (int i = 0; i < 2; i++) {
         switch (inst->regs[i]) {
             case A:
-                printf(" A");
+               fprintf(fp, " A");
                 break;
             case B:
-                printf(" B");
+               fprintf(fp, " B");
                 break;
             case C:
-                printf(" C");
+               fprintf(fp, " C");
                 break;
             case D:
-                printf(" D");
+               fprintf(fp, " D");
                 break;
             case H:
-                printf(" H");
+               fprintf(fp, " H");
                 break;
             case E:
-                printf(" E");
+               fprintf(fp, " E");
                 break;
             case L:
-                printf(" L");
+               fprintf(fp, " L");
                 break;
             case SP:
-                printf(" SP");
+               fprintf(fp, " SP");
                 break;
             case M:
-                printf(" M");
+               fprintf(fp, " M");
                 break;
             case PSW:
-                printf(" PSW");
+               fprintf(fp, " PSW");
                 break;
             case none:
-                printf("");
+               fprintf(fp, "");
                 break;
             default:
-                printf(" ?");
+               fprintf(fp, " ?");
                 break;
         }
     }
-    printf(" ");
+   fprintf(fp, " ");
     
     for (int i = inst->num_bytes - 1; i > 0; i--) {
-        printf("%02x", (unsigned char)state->memory[state->pc+i]);
+       fprintf(fp, "%02x", (unsigned char)state->memory[state->pc+i]);
     }
 
 }

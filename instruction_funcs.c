@@ -111,7 +111,7 @@ void stax(cpu_state *state, instruction *inst){printf("not implemented1");}
 void lhld(cpu_state *state, instruction *inst){printf("not implemented2");}
 
 void shld(cpu_state *state, instruction *inst){
-    printf("shld\n");
+    //printf("shld\n");
     uint16_t address = data_for_instruction(state, inst);
     write_to_mem(state, address, state->regs[L]);
     write_to_mem(state, address+1, state->regs[H]);
@@ -241,15 +241,15 @@ void dcr(cpu_state *state, instruction *inst){
 void cmp(cpu_state *state, instruction *inst){
     reg cmp_reg = inst->regs[0];
     uint8_t cmp_data = 0;
-    
-    switch (cmp_reg) {
+    /*switch (cmp_reg) {
         case H:
             cmp_data = data_for_regpair(state, H);
             break;
         default:
             cmp_data = state->regs[cmp_reg];
             break;
-    }
+    }*/
+    cmp_data = state->regs[cmp_reg];
     
     uint16_t result = state->regs[A] - cmp_data;
     set_flagbits_szapc(state,
@@ -264,17 +264,17 @@ void ana(cpu_state *state, instruction *inst){
     reg reg0 = inst->regs[0];
     uint8_t data;
     uint8_t next_a;
-    
     if (reg0 == M) {
         uint16_t address = read_from_HL(state);
         data = state->memory[address];
         next_a = state->regs[A] & data;
-        write_to_mem(state, address, next_a);
+        //write_to_mem(state, address, next_a);
+        state->regs[A] = next_a;
     }
     else {
         data = state->regs[reg0];
         next_a = state->regs[A] & data;
-        state->regs[reg0] = next_a;
+        state->regs[A] = next_a;
     }
       
     set_flagbits_szapc(state,
@@ -294,12 +294,13 @@ void xra(cpu_state *state, instruction *inst){
         uint16_t address = read_from_HL(state);
         data = state->memory[address];
         next_a = state->regs[A] ^ data;
-        write_to_mem(state, address, next_a);
+        //write_to_mem(state, address, next_a);
+        state->regs[A] = next_a;
     }
     else {
         data = state->regs[reg0];
         next_a = state->regs[A] ^ data;
-        state->regs[reg0] = next_a;
+        state->regs[A] = next_a;
     }
     
     set_flagbits_szapc(state,
@@ -327,12 +328,13 @@ void cpi(cpu_state *state, instruction *inst){
     uint8_t data = data_for_instruction(state, inst);
     
     uint16_t result = state->regs[A] - data;
+    // Carry bit set if a < data
     set_flagbits_szapc(state,
                        (result >> 7) & 1,
                        (result & 0xff) == 0,
                        0,
                        calc_parity(result),
-                       (result >> 8) & 1);
+                       state->regs[A] < data);
 }
 void ani(cpu_state *state, instruction *inst){
     uint8_t data = data_for_instruction(state, inst);
@@ -380,10 +382,10 @@ void dad(cpu_state *state, instruction *inst){
     uint16_t data2 = data_for_regpair(state, H);  //contents of HL register pair
     uint32_t result = data1 + data2;
     
-    state->regs[H] = result >> 8;
-    state->regs[L] = result;
+    state->regs[H] = (result & 0xff00) >> 8;
+    state->regs[L] = result & 0xff;
     
-    set_flagbit(state, (result >> 8) & 1, C_shift);
+    set_flagbit(state, (result & 0xffff0000) != 0, C_shift);
 }
 void inx(cpu_state *state, instruction *inst){
     reg reg0 = inst->regs[0];
@@ -407,6 +409,7 @@ void inx(cpu_state *state, instruction *inst){
     else if (reg0 == SP) {
         state->sp = data;
     }
+
 }
 void dcx(cpu_state *state, instruction *inst){printf("not implementedh");}
 
@@ -695,10 +698,10 @@ uint16_t pop_data(cpu_state *state, uint8_t num_bytes) {
     
     for (uint8_t i = 0; i < num_bytes; i++) {
         data |= state->memory[state->sp + i] << (i * 8);
-        state->pc++;
+        //state->pc++;
     }
     
-    state->sp += 2;
+    state->sp += num_bytes;
     return data;
 }
 
