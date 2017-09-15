@@ -104,11 +104,22 @@ void ldax(cpu_state *state, instruction *inst) {
     state->regs[A] = state->memory[address];
 }
 
-void stax(cpu_state *state, instruction *inst){printf("not implemented1");}
+void stax(cpu_state *state, instruction *inst){
+    //printf("not implemented1");
+    reg reg0 = inst->regs[0];
+    uint16_t offset = data_for_regpair(state, reg0);
+    write_to_mem(state, offset, state->regs[A]);
+}
 
 #pragma mark - 16 bit transfers
 
-void lhld(cpu_state *state, instruction *inst){printf("not implemented2");}
+#warning
+void lhld(cpu_state *state, instruction *inst){
+    //printf("not implemented2");
+    uint16_t offset = data_for_instruction(state, inst);
+    state->regs[L] = state->memory[offset];
+    state->regs[H] = state->memory[offset+1];
+}
 
 void shld(cpu_state *state, instruction *inst){
     //printf("shld\n");
@@ -180,9 +191,22 @@ void pop(cpu_state *state, instruction *inst) {
     state->sp += 2;
 }
 
-void xthl(cpu_state *state, instruction *inst){printf("not implemented3");}
+#warning
+void xthl(cpu_state *state, instruction *inst){
+    //printf("not implemented3");
+    uint8_t h = state->regs[H];
+    uint8_t l = state->regs[L];
+    state->regs[L] = state->memory[state->sp];
+    state->regs[H] = state->memory[state->sp+1];
+    write_to_mem(state, state->sp, l);
+    write_to_mem(state, state->sp+1, h);
+}
 void sphl(cpu_state *state, instruction *inst){printf("not implemented4");}
-void pchl(cpu_state *state, instruction *inst){printf("not implemented5");}
+#warning
+void pchl(cpu_state *state, instruction *inst){
+    //printf("not implemented5");
+    state->pc = read_from_HL(state);
+}
 
 void xchg(cpu_state *state, instruction *inst){
     // Exchange HL and DE
@@ -212,7 +236,31 @@ void add(cpu_state *state, instruction *inst){
 }
 
 void sub(cpu_state *state, instruction *inst){printf("not implemented7");}
-void inr(cpu_state *state, instruction *inst){printf("not implemented8");}
+#warning
+void inr(cpu_state *state, instruction *inst){
+    //printf("not implemented8");
+    uint8_t current_value, next_value;
+    reg reg0 = inst->regs[0];
+    
+    if (reg0 == M) {
+        uint16_t address = read_from_HL(state);
+        current_value = state->memory[address];
+        next_value = current_value + 1;
+        write_to_mem(state, address, next_value);
+    }
+    else {
+        current_value = state->regs[reg0];
+        next_value = current_value + 1;
+        state->regs[reg0] = next_value;
+    }
+    
+    set_flagbits_szapc(state,
+                       (next_value >> 7) && 1,
+                       next_value == 0,
+                       0,
+                       calc_parity(next_value),
+                       next_value > current_value);
+}
 
 void dcr(cpu_state *state, instruction *inst){
     uint8_t current_value, next_value;
@@ -284,7 +332,33 @@ void ana(cpu_state *state, instruction *inst){
                        calc_parity(next_a),
                        0);
 }
-void ora(cpu_state *state, instruction *inst){ printf("not implemented9");}
+#warning
+void ora(cpu_state *state, instruction *inst){
+    //printf("not implemented9");
+    reg reg0 = inst->regs[0];
+    uint8_t data;
+    uint8_t next_a;
+    
+    if (reg0 == M) {
+        uint16_t address = read_from_HL(state);
+        data = state->memory[address];
+        next_a = state->regs[A] | data;
+        state->regs[A] = next_a;
+    }
+    else {
+        data = state->regs[reg0];
+        next_a = state->regs[A] | data;
+        state->regs[A] = next_a;
+    }
+    
+    set_flagbits_szapc(state,
+                       (next_a >> 7) & 1,
+                       next_a == 0,
+                       0,
+                       calc_parity(next_a),
+                       0);
+}
+
 void xra(cpu_state *state, instruction *inst){
     reg reg0 = inst->regs[0];
     uint8_t data;
@@ -348,7 +422,19 @@ void ani(cpu_state *state, instruction *inst){
                        calc_parity(next_a),
                        0);
 }
-void ori(cpu_state *state, instruction *inst){printf("not implementeda");}
+#warning
+void ori(cpu_state *state, instruction *inst){
+    //printf("not implementeda");
+    uint8_t data = data_for_instruction(state, inst);
+    uint8_t x = state->regs[A] | data;
+    state->regs[A] = x;
+    set_flagbits_szapc(state,
+                       (x >> 7) & 1,
+                       (x & 0xff) == 0,
+                       0,
+                       calc_parity(x),
+                       0);
+}
 void xri(cpu_state *state, instruction *inst){printf("not implementedb");}
 
 void daa(cpu_state *state, instruction *inst){
@@ -369,10 +455,44 @@ void daa(cpu_state *state, instruction *inst){
     //printf("not implementedc");
 }
 
-void adc(cpu_state *state, instruction *inst){printf("not implementedd");}
+void adc(cpu_state *state, instruction *inst){
+    //printf("not implementedd");
+    reg reg0 = inst->regs[0];
+    uint16_t c = get_flagbit(state, C_shift);
+    uint16_t other = 0;
+    
+    if (reg0 == M) {
+        other = read_from_HL(state);
+    } else {
+        other = state->regs[reg0];
+    }
+    
+    uint16_t res = state->regs[A] + other + c;
+    state->regs[A]= (res & 0xff);
+    
+    set_flagbits_szapc(state,
+                       0x80 == (res & 0x80),
+                       (res&0xff) == 0,
+                       0,
+                       calc_parity(res&0xff),
+                       res > 0xff);
+}
+
 void aci(cpu_state *state, instruction *inst){printf("not implementede");}
 void sbb(cpu_state *state, instruction *inst){printf("not implementedf");}
-void sbi(cpu_state *state, instruction *inst){printf("not implementedg");}
+void sbi(cpu_state *state, instruction *inst){
+    //printf("not implementedg");
+    uint8_t data = data_for_instruction(state, inst);
+    uint8_t c = get_flagbit(state, C_shift);
+    uint16_t res = state->regs[A] - data - c;
+    state->regs[A] = res & 0xff;
+    set_flagbits_szapc(state,
+                       0x80 == (res & 0x80),
+                       (res&0xff) == 0,
+                       0,
+                       calc_parity(res&0xff),
+                       res > 0xff);
+}
 
 #pragma mark - 16 bit arithmetic
 
@@ -411,7 +531,25 @@ void inx(cpu_state *state, instruction *inst){
     }
 
 }
-void dcx(cpu_state *state, instruction *inst){printf("not implementedh");}
+#warning
+void dcx(cpu_state *state, instruction *inst){
+    //printf("not implementedh");
+    reg reg0 = inst->regs[0];
+    uint16_t data = data_for_regpair(state, reg0) - 1;
+    
+    if (reg0 == B) {
+        state->regs[B] = (data & 0xff00) >> 8;
+        state->regs[C] = data & 0xff;
+    } else if (reg0 == H) {
+        state->regs[H] = (data & 0xff00) >> 8;
+        state->regs[L] = data & 0xff;
+    } else if (reg0 == D) {
+        state->regs[D] = (data & 0xff00) >> 8;
+        state->regs[E] = data & 0xff;
+    } else if (reg0 == SP) {
+        state->sp -= 1;
+    }
+}
 
 #pragma mark - Jumps, Calls, Returns
 
@@ -439,7 +577,18 @@ void jnz(cpu_state *state, instruction *inst){
     }
 }
 
-void cnz(cpu_state *state, instruction *inst){printf("not implementedi");}
+#warning
+void cnz(cpu_state *state, instruction *inst){
+    //printf("not implementedi");
+    if (!get_flagbit(state, Z_shift)) {
+        uint16_t return_pc = state->pc + inst->num_bytes; // - 1;
+        push_data(state, return_pc);
+        state->pc = data_for_instruction(state, inst);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
 void rnz(cpu_state *state, instruction *inst){
     if (!get_flagbit(state, Z_shift)) {
         state->pc = pop_data(state, 2);
@@ -456,7 +605,17 @@ void jz(cpu_state *state, instruction *inst){
         state->pc += inst->num_bytes;
     }
 }
-void cz(cpu_state *state, instruction *inst){printf("not implementedj");}
+void cz(cpu_state *state, instruction *inst){
+    //printf("not implementedj");
+    if (get_flagbit(state, Z_shift)) {
+        uint16_t return_pc = state->pc + inst->num_bytes; // - 1;
+        push_data(state, return_pc);
+        state->pc = data_for_instruction(state, inst);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
 void rz(cpu_state *state, instruction *inst){
     if (get_flagbit(state, Z_shift)) {
         state->pc = pop_data(state, 2);
@@ -483,7 +642,16 @@ void cnc(cpu_state *state, instruction *inst){
         state->pc += inst->num_bytes;
     }
 }
-void rnc(cpu_state *state, instruction *inst){printf("not implementedk");}
+#warning DOIT
+void rnc(cpu_state *state, instruction *inst){
+    //printf("not implementedk");
+    if (!get_flagbit(state, C_shift)) {
+        state->pc = pop_data(state, 2);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
 void jc(cpu_state *state, instruction *inst){
     if (get_flagbit(state, C_shift)) {
         state->pc = data_for_instruction(state, inst);
@@ -501,9 +669,28 @@ void rc(cpu_state *state, instruction *inst){
         state->pc += inst->num_bytes;
     }
 }
-void jpo(cpu_state *state, instruction *inst){printf("not implementedm");}
+#warning
+void jpo(cpu_state *state, instruction *inst){
+    //printf("not implementedm");
+    if (!get_flagbit(state, P_shift)) {   // parity of 0 is odd
+        state->pc = data_for_instruction(state, inst);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
 void cpo(cpu_state *state, instruction *inst){printf("not implementedn");}
-void rpo(cpu_state *state, instruction *inst){printf("not implementedo");}
+#warning
+void rpo(cpu_state *state, instruction *inst){
+    //printf("not implementedo");
+    if (!get_flagbit(state, P_shift)) {   // parity of 0 is odd
+        state->pc = pop_data(state, 2);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
+
 void jpe(cpu_state *state, instruction *inst){printf("not implementedp");}
 void cpe(cpu_state *state, instruction *inst){
     if (get_flagbit(state, P_shift)) {   // parity of 1 is even
@@ -535,7 +722,15 @@ void rp(cpu_state *state, instruction *inst){
         state->pc += inst->num_bytes;
     }
 }
-void jm(cpu_state *state, instruction *inst){printf("not implementeds");}
+#warning
+void jm(cpu_state *state, instruction *inst){
+    //printf("not implementeds");
+    if (get_flagbit(state, S_shift)) {  // sign on is minus
+        state->pc = data_for_instruction(state, inst);
+    } else {
+        state->pc += inst->num_bytes;
+    }
+}
 void cm(cpu_state *state, instruction *inst){
     if (get_flagbit(state, S_shift)) {   // sign on is minus
         uint16_t return_pc = state->pc + inst->num_bytes;
@@ -546,12 +741,41 @@ void cm(cpu_state *state, instruction *inst){
         state->pc += inst->num_bytes;
     }
 }
-void rm(cpu_state *state, instruction *inst){printf("not implementedt");}
+void rm(cpu_state *state, instruction *inst){
+    //printf("not implementedt");
+    if (get_flagbit(state, S_shift)) {  // If sign bit is on, it is negative
+        state->pc = pop_data(state, 2);
+    }
+    else {
+        state->pc += inst->num_bytes;
+    }
+}
 
 #pragma mark - Rotations
-void ral(cpu_state *state, instruction *inst){printf("not implementedu");}
-void rar(cpu_state *state, instruction *inst){printf("not implementedv");}
-void rlc(cpu_state *state, instruction *inst){printf("not implementedw");}
+#warning
+void ral(cpu_state *state, instruction *inst){
+    //printf("not implementedu");
+    uint8_t x = state->regs[A];
+    state->regs[A] = get_flagbit(state, C_shift)  | (x << 1);
+    set_flagbit(state, 0x80 == (x & 0x80), C_shift);
+}
+
+#warning
+void rar(cpu_state *state, instruction *inst){
+    //printf("not implementedv");
+    uint8_t x = state->regs[A];
+    uint8_t c = get_flagbit(state, C_shift);
+    state->regs[A] = (c << 7) | (x >> 1);
+    set_flagbit(state, 1 == (x&1), C_shift);
+}
+
+#warning
+void rlc(cpu_state *state, instruction *inst){
+    //printf("not implementedw");
+    uint8_t x = state->regs[A];
+    state->regs[A] = ((x & 0x80) >> 7) | (x << 1);
+    set_flagbit(state, 0x80 == (x & 0x80), C_shift);
+}
 
 void rrc(cpu_state *state, instruction *inst){
     uint8_t a = state->regs[A];
@@ -595,7 +819,7 @@ void out_inst(cpu_state *state, instruction *inst){
             state->shift_offset = data & 0x7;
             break;
         case 4:  // Port 4 writes a byte to the 16 bit shift register
-            printf("4\n.");
+            //printf("4\n");
             state->shift_right_byte = state->shift_left_byte;
             state->shift_left_byte = data;// & 0x7;
             break;
@@ -603,8 +827,16 @@ void out_inst(cpu_state *state, instruction *inst){
 }
 
 void cmc(cpu_state *state, instruction *inst){printf("not implementedx");}
-void stc(cpu_state *state, instruction *inst){printf("not implementedy");}
-void cma(cpu_state *state, instruction *inst){printf("not implementedz");}
+#warning
+void stc(cpu_state *state, instruction *inst){
+    //printf("not implementedy");
+    set_flagbit(state, 1, C_shift);
+}
+
+void cma(cpu_state *state, instruction *inst){
+    //printf("not implementedz");
+    state->regs[A] = ~state->regs[A];
+}
 
 void di(cpu_state *state, instruction *inst) {
     state->interrupt_enable = 0;
@@ -614,7 +846,7 @@ void ei(cpu_state *state, instruction *inst) {
 }
 
 void rst(cpu_state *state, instruction *inst, uint8_t interrupt_num){
-    printf("rst%d\n", interrupt_num);
+    //printf("rst%d\n", interrupt_num);
     push_data(state, state->pc);
     state->pc = 8 * interrupt_num;
 }
@@ -679,7 +911,16 @@ static uint16_t reverse2bytes(uint16_t data) {
 }
 
 static int is_allowed_to_write_here(cpu_state *state, uint16_t offset) {
-    return offset >= 0x2000 && offset < 0x4000;
+    if (offset < 0x2000) {
+        printf("there\n");
+        return 0;
+    }
+    if (offset >= 0x4000) {
+        printf("here\n");
+        return 0;
+    }
+    return 1;
+    //return offset >= 0x2000 && offset < 0x4000;
 }
 
 /* Writes 1 byte to memory */

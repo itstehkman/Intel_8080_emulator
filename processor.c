@@ -110,3 +110,5 @@ void lineup_with_cpu_rate(cpu_state *state, unsigned short (*emulate_func)(cpu_s
     
     //percent_too_slow = 100.0 * (float)(total_inst_not_fast_enough) / (total_inst_fast_enough + total_inst_not_fast_enough);
 }
+
+

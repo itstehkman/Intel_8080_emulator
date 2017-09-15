@@ -35,7 +35,9 @@ static const unsigned int RGB_OFF = 0x00000000L;
     
     // Run CPU on any thread other than main thread.
     dispatch_queue_t backgroundQueueForCPUSerial = dispatch_queue_create("com.8080Emulator.backgroundQueueForCPUSerial", NULL);
+    
     dispatch_async(backgroundQueueForCPUSerial, ^{
+        
         run_cpu(&_state);
     });
 }
