@@ -30,7 +30,7 @@ instruction fetch_decode(cpu_state *state) {
 void gen_interrupt(cpu_state *state, uint8_t interrupt_num) {
     push_data(state, state->pc);
     state->pc = 8 * interrupt_num;  // essentially the same as calling RST <interrupt_num>
-    //state->interrupt_enable = 0;
+    state->interrupt_enable = 0;
 }
 
 // Returns the number of cycles to stall for
@@ -103,5 +103,5 @@ void lineup_with_cpu_rate(cpu_state *state, unsigned short (*emulate_func)(cpu_s
     
     last_inst_finish_usec = time_usec();
     
-    // percent_too_slow = 100.0 * (float)(total_inst_not_fast_enough) / (total_inst_fast_enough + total_inst_not_fast_enough);
+    //percent_too_slow = 100.0 * (float)(total_inst_not_fast_enough) / (total_inst_fast_enough + total_inst_not_fast_enough);
 }

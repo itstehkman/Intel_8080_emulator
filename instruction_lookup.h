@@ -54,7 +54,7 @@ static const instruction inst_lookup[0x100] = {
 {ADC, adc, {B, 0}, 1, 4}, {ADC, adc, {C, 0}, 1, 4}, {ADC, adc, {D, 0}, 1, 4}, {ADC, adc, {E, 0}, 1, 4},
 {ADC, adc, {H, 0}, 1, 4}, {ADC, adc, {L, 0}, 1, 4}, {ADC, adc, {M, 0}, 1, 7}, {ADC, adc, {A, 0}, 1, 4},
 
-{SUB, sub, {B, 0}, 1, 4}, {SUB, sub, {C, 0}, 1, 4}, {SUB, add, {D, 0}, 1, 4}, {SUB, sub, {E, 0}, 1, 4},
+{SUB, sub, {B, 0}, 1, 4}, {SUB, sub, {C, 0}, 1, 4}, {SUB, sub, {D, 0}, 1, 4}, {SUB, sub, {E, 0}, 1, 4},
 {SUB, sub, {H, 0}, 1, 4}, {SUB, sub, {L, 0}, 1, 4}, {SUB, sub, {M, 0}, 1, 7}, {SUB, sub, {A, 0}, 1, 4},
 {SBB, sbb, {B, 0}, 1, 4}, {SBB, sbb, {C, 0}, 1, 4}, {SBB, sbb, {D, 0}, 1, 4}, {SBB, sbb, {E, 0}, 1, 4},
 {SBB, sbb, {H, 0}, 1, 4}, {SBB, sbb, {L, 0}, 1, 4}, {SBB, sbb, {M, 0}, 1, 7}, {SBB, sbb, {A, 0}, 1, 4},
